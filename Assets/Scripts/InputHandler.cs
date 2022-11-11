@@ -13,9 +13,26 @@ namespace RC
         public float mouseY;
 
         PlayerControls inputActions;
+        CameraHandler cameraHandler;
 
         Vector2 movementInput; // Vector2 to store InputAction -> Movement's value
         Vector2 cameraInput; // Vector2 to store InputAction -> Camera's value
+
+        private void Awake()
+        {
+            cameraHandler = CameraHandler.singleton;
+        }
+
+        private void FixedUpdate()
+        {
+            float delta = Time.fixedDeltaTime;
+
+            if (cameraHandler != null)
+            {
+                cameraHandler.FollowTarget(delta);
+                cameraHandler.HandleCameraRotation(delta, mouseX, mouseY);
+            }
+        }
 
         public void OnEnable() //  Assign delegated funtions to InputActions, Enable Player Input
         {
