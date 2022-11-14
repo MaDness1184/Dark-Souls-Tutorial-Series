@@ -9,7 +9,7 @@ namespace RC
         public Transform targetTransform; // Lock on target
         public Transform cameraTransform; // transform of the camera
         public Transform cameraPivotTransform; // camera swivel for rotation
-        private Transform myTransform;  // transform of camera holder
+        private Transform myTransform; // transform of camera holder
         private Vector3 cameraTransformPosition; // 
         private LayerMask ignoreLayers;
 
@@ -30,31 +30,31 @@ namespace RC
             singleton = this;
             myTransform = transform;
             defaultPosition = cameraTransform.localPosition.z;
-            ignoreLayers = ~(1 << 8 | 1 << 9 | 1 << 10);
+            ignoreLayers = ~(1 << 8 | 1 << 9 | 1 << 10); // Ignore some physics layers
         }
 
-        public void FollowTarget(float delta) // Follow our target
+        public void FollowTarget(float delta) // Follow our target transform
         {
-            Vector3 targetPosition = Vector3.Lerp(myTransform.position, targetTransform.position, delta / followSpeed); // lerp between the Camera Holder position and the locked on target position
+            Vector3 targetPosition = Vector3.Lerp(myTransform.position, targetTransform.position, delta / followSpeed); // lerp between the Camera Holder position and the locked on target position / the Player's position; Lerp(a, b, t) = a + (b - a) * t; https://docs.unity3d.com/ScriptReference/Vector2.Lerp.html
             myTransform.position = targetPosition;
         }
 
-        public void HandleCameraRotation(float delta, float mouseXInput, float mouseYInput)
+        public void HandleCameraRotation(float delta, float mouseXInput, float mouseYInput) // Handles camera rotation based on the Player's input every frame
         {
-            lookAngle += (mouseXInput * lookSpeed) / delta;
-            pivotAngle -= (mouseYInput * pivotSpeed) / delta;
-            pivotAngle = Mathf.Clamp(pivotAngle, minPivot, maxPivot);
+            lookAngle += (mouseXInput * lookSpeed) / delta; // (input direction * speed) / change in time; dividing by delta keeps the movement consistant
+            pivotAngle -= (mouseYInput * pivotSpeed) / delta; // (input direction * speed) / change in time; dividing by delta keeps the movement consistant
+            pivotAngle = Mathf.Clamp(pivotAngle, minPivot, maxPivot); // Clamps the pivot value between minPivot and maxPivot; this clamps the rotation of the camera in the vertical direction to not clip through the floor or ceiling; https://docs.unity3d.com/ScriptReference/Mathf.Clamp.html
 
-            Vector3 rotation = Vector3.zero;
+            Vector3 rotation = Vector3.zero; // reset rotation to get the raw lookAngle angular rotational value
             rotation.y = lookAngle;
-            Quaternion targetRotation = Quaternion.Euler(rotation);
+            Quaternion targetRotation = Quaternion.Euler(rotation); // https://docs.unity3d.com/ScriptReference/Quaternion.Euler.html
             myTransform.rotation = targetRotation;
 
-            rotation = Vector3.zero;
+            rotation = Vector3.zero; // reset rotation to get the raw pivotAngle angular rotational value
             rotation.x = pivotAngle;
 
-            targetRotation = Quaternion.Euler(rotation);
-            cameraPivotTransform.localRotation = targetRotation;
+            targetRotation = Quaternion.Euler(rotation); // https://docs.unity3d.com/ScriptReference/Quaternion.Euler.html
+            cameraPivotTransform.localRotation = targetRotation; // https://docs.unity3d.com/ScriptReference/Transform-localRotation.html
         }
     }
 }

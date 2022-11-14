@@ -47,8 +47,8 @@ namespace RC
 
             moveDirection = cameraObject.forward * inputHandler.vertical; // wherever the camera's Z-axis is facing * by the Y-INPUT of the user
             moveDirection += cameraObject.right * inputHandler.horizontal; // wherever the camera's Z-axis is facing * by the X-INPUT of the user
-            moveDirection.Normalize(); // Clamping direction between 1 and 0
-            moveDirection.y = 0; // freeze movement on y-axis
+            moveDirection.Normalize(); // Clamping direction between 1 and 0; https://docs.unity3d.com/ScriptReference/Vector3.Normalize.html
+            moveDirection.y = 0; // freeze movement on y-axis; stop levitation glitch
 
             float speed = movementSpeed;
             moveDirection *= speed; // direction x velocity
