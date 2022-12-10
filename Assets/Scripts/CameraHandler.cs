@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-namespace RC
+namespace DarkSoulsGame
 {
     public class CameraHandler : MonoBehaviour
     {

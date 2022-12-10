@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-namespace RC
+namespace DarkSoulsGame
 {
     public class PlayerLocomotion : MonoBehaviour
     {
@@ -44,25 +44,8 @@ namespace RC
             float delta = Time.deltaTime;
 
             inputHandler.TickInput(delta); // update the movement input of the player every frame
-
-            moveDirection = cameraObject.forward * inputHandler.vertical; // wherever the camera's Z-axis is facing * by the Y-INPUT of the user
-            moveDirection += cameraObject.right * inputHandler.horizontal; // wherever the camera's Z-axis is facing * by the X-INPUT of the user
-            moveDirection.Normalize(); // Clamping direction between 1 and 0; https://docs.unity3d.com/ScriptReference/Vector3.Normalize.html
-            moveDirection.y = 0; // freeze movement on y-axis; stop levitation glitch
-
-            float speed = movementSpeed;
-            moveDirection *= speed; // direction x velocity
-
-            Vector3 projectedVelocity = Vector3.ProjectOnPlane(moveDirection, normalVector); // Keep the movement relative to what the player is standing on?
-            rigidbody.velocity = projectedVelocity; // move the player
-
-            animatorHandler.UpdateAnimatorValues(inputHandler.moveAmount, 0); 
-
-            if (animatorHandler.canRotate)
-            {
-                HandleRotation(delta);
-            }
-
+            HandleMovement(delta);
+            HandleRollingAndSprinting(delta);
         }
 
         #region Movement
@@ -87,6 +70,51 @@ namespace RC
             Quaternion targetRotation = Quaternion.Slerp(myTransform.rotation, tr, rs * delta); // Spherical Interpolation: Rotate at a constant angular speed; Slerp(current rotation, end result rotation, speed of interpolation)
 
             myTransform.rotation = targetRotation;
+        }
+
+        public void HandleMovement(float delta)
+        {
+            moveDirection = cameraObject.forward * inputHandler.vertical; // wherever the camera's Z-axis is facing * by the Y-INPUT of the user
+            moveDirection += cameraObject.right * inputHandler.horizontal; // wherever the camera's Z-axis is facing * by the X-INPUT of the user
+            moveDirection.Normalize(); // Clamping direction between 1 and 0; https://docs.unity3d.com/ScriptReference/Vector3.Normalize.html
+            moveDirection.y = 0; // freeze movement on y-axis; stop levitation glitch
+
+            float speed = movementSpeed;
+            moveDirection *= speed; // direction x velocity
+
+            Vector3 projectedVelocity = Vector3.ProjectOnPlane(moveDirection, normalVector); // Keep the movement relative to what the player is standing on?
+            rigidbody.velocity = projectedVelocity; // move the player
+
+            animatorHandler.UpdateAnimatorValues(inputHandler.moveAmount, 0);
+
+            if (animatorHandler.canRotate)
+            {
+                HandleRotation(delta);
+            }
+        }
+
+        public void HandleRollingAndSprinting(float delta)
+        {
+            if (animatorHandler.anim.GetBool("isInteracting"))
+                return;
+
+            if (inputHandler.rollFlag) // If roll was preformed from InputManager
+            {
+                moveDirection = cameraObject.forward * inputHandler.vertical; // move player forward due to the camera's vertical direction
+                moveDirection += cameraObject.right * inputHandler.horizontal; // add right movement due to the camera's horizontal direction
+
+                if (inputHandler.moveAmount > 0) //If the Player has movement
+                {
+                    animatorHandler.PlayTargetAnimation("Rolling", true);
+                    moveDirection.y = 0;
+                    Quaternion rollRotation = Quaternion.LookRotation(moveDirection); // https://docs.unity3d.com/ScriptReference/Quaternion.LookRotation.html
+                    myTransform.rotation = rollRotation;
+                }
+                else // no movement = backstep
+                {
+                    animatorHandler.PlayTargetAnimation("Backstep", true);
+                }
+            }
         }
 
         #endregion

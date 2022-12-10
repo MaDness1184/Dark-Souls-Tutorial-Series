@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace RC
+namespace DarkSoulsGame
 {
     public class InputHandler : MonoBehaviour
     {
@@ -11,6 +11,10 @@ namespace RC
         public float moveAmount;
         public float mouseX;
         public float mouseY;
+
+        public bool b_Input; // input of button b
+        public bool rollFlag;
+        public bool isInteracting;
 
         PlayerControls inputActions;
         CameraHandler cameraHandler;
@@ -54,6 +58,7 @@ namespace RC
         public void TickInput(float delta)
         {
             MoveInput(delta);
+            HandleRollInput(delta);
         }
 
         private void MoveInput(float delta)
@@ -63,6 +68,16 @@ namespace RC
             moveAmount = Mathf.Clamp01(Mathf.Abs(horizontal) + Mathf.Abs(vertical)); // Clamp01 clamps the value between 0 and 1; 
             mouseX = cameraInput.x;
             mouseY = cameraInput.y;
+        }
+
+        private void HandleRollInput(float delta)
+        {
+            b_Input = inputActions.PlayerActions.Roll.phase == UnityEngine.InputSystem.InputActionPhase.Performed; // Checks if the Roll action was preformed from the inputSystem
+
+            if (b_Input)
+            {
+                rollFlag = true;
+            }
         }
     }
 }
