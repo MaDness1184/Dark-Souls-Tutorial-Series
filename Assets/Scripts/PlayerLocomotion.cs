@@ -24,7 +24,11 @@ namespace DarkSoulsGame
         [SerializeField]
         float movementSpeed = 5;
         [SerializeField]
+        float sprintSpeed = 7;
+        [SerializeField]
         float rotationSpeed = 10;
+
+        public bool isSprinting; // sprint flag for AnimatorHandler
 
         Vector3 normalVector;
         Vector3 targetPosition;
@@ -41,8 +45,9 @@ namespace DarkSoulsGame
 
         public void Update()
         {
-            float delta = Time.deltaTime;
+            float delta = Time.deltaTime; // Holds the current runtime as a single variable for more methods to use
 
+            isSprinting = inputHandler.b_Input;
             inputHandler.TickInput(delta); // update the movement input of the player every frame
             HandleMovement(delta);
             HandleRollingAndSprinting(delta);
@@ -74,18 +79,31 @@ namespace DarkSoulsGame
 
         public void HandleMovement(float delta)
         {
+            if (inputHandler.rollFlag) // no movement when rolling
+                return;
+
             moveDirection = cameraObject.forward * inputHandler.vertical; // wherever the camera's Z-axis is facing * by the Y-INPUT of the user
             moveDirection += cameraObject.right * inputHandler.horizontal; // wherever the camera's Z-axis is facing * by the X-INPUT of the user
             moveDirection.Normalize(); // Clamping direction between 1 and 0; https://docs.unity3d.com/ScriptReference/Vector3.Normalize.html
             moveDirection.y = 0; // freeze movement on y-axis; stop levitation glitch
 
             float speed = movementSpeed;
-            moveDirection *= speed; // direction x velocity
+
+            if (inputHandler.sprintFlag) // if sprinting is true
+            {
+                speed = sprintSpeed; // new speed or velocity
+                isSprinting = true; // sprint flag for animations
+                moveDirection *= speed; // direction x velocity
+            }
+            else
+            {
+                moveDirection *= speed; // direction x velocity
+            }
 
             Vector3 projectedVelocity = Vector3.ProjectOnPlane(moveDirection, normalVector); // Keep the movement relative to what the player is standing on?
             rigidbody.velocity = projectedVelocity; // move the player
 
-            animatorHandler.UpdateAnimatorValues(inputHandler.moveAmount, 0);
+            animatorHandler.UpdateAnimatorValues(inputHandler.moveAmount, 0, isSprinting);
 
             if (animatorHandler.canRotate)
             {
@@ -105,8 +123,8 @@ namespace DarkSoulsGame
 
                 if (inputHandler.moveAmount > 0) //If the Player has movement
                 {
-                    animatorHandler.PlayTargetAnimation("Rolling", true);
-                    moveDirection.y = 0;
+                    animatorHandler.PlayTargetAnimation("Rolling", true); // Play Rolling
+                    moveDirection.y = 0; // <- to ensure there is no movement on the y-axis
                     Quaternion rollRotation = Quaternion.LookRotation(moveDirection); // https://docs.unity3d.com/ScriptReference/Quaternion.LookRotation.html
                     myTransform.rotation = rollRotation;
                 }

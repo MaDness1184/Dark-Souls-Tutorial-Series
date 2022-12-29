@@ -22,7 +22,7 @@ namespace DarkSoulsGame
             horizontal = Animator.StringToHash("Horizontal"); // Turn "Vertical" parameter of the animator to a id
         }
 
-        public void UpdateAnimatorValues(float verticalMovement, float horizontalMovement) // moveAmount in InputHandler is passed
+        public void UpdateAnimatorValues(float verticalMovement, float horizontalMovement, bool isSprinting) // moveAmount in InputHandler is passed
         {
             #region Vertical
             ///
@@ -59,6 +59,12 @@ namespace DarkSoulsGame
                 h = 0;
 
             #endregion
+
+            if (isSprinting) // if flag isSprinting in PlayerLocomotion script is true then set v = 2 to trigger sprint animation
+            {
+                v = 2;
+                h = horizontalMovement;
+            }
 
             anim.SetFloat(vertical, v, 0.1f, Time.deltaTime); // SetFloat(string name, value, dampTime, deltaTime)
             anim.SetFloat(horizontal, h, 0.1f, Time.deltaTime); // SetFloat(string name, value, dampTime, deltaTime)

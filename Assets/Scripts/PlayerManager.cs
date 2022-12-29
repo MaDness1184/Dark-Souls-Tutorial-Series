@@ -21,6 +21,7 @@ namespace DarkSoulsGame
         {
             inputHandler.isInteracting = anim.GetBool("isInteracting");
             inputHandler.rollFlag = false; // reset rollFlag
+            inputHandler.sprintFlag = false;
         }
     }
 }

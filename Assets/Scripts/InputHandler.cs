@@ -13,7 +13,10 @@ namespace DarkSoulsGame
         public float mouseY;
 
         public bool b_Input; // input of button b
+
         public bool rollFlag;
+        public bool sprintFlag;
+        public float rollInputTimer; // delta time decider if the player rolls or sprints in game
         public bool isInteracting;
 
         PlayerControls inputActions;
@@ -76,7 +79,18 @@ namespace DarkSoulsGame
 
             if (b_Input)
             {
-                rollFlag = true;
+                rollInputTimer += delta;
+                sprintFlag = true;
+            }
+            else
+            {
+                if (rollInputTimer > 0 && rollInputTimer < 0.5f) // if "B" input is tapped not held
+                {
+                    sprintFlag = false;
+                    rollFlag = true;
+                }
+
+                rollInputTimer = 0; // reset roll timer
             }
         }
     }
